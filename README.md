@@ -1,26 +1,26 @@
 # AWS-VPC-Peering-Project
 AWS VPC Peering project demonstrating private communication between two VPCs.
 
+
 # AWS VPC Peering Project
 
-## Project Overview
+## 1. Project Overview
 
-This project demonstrates private communication between two Amazon Virtual Private Clouds (VPCs) using AWS VPC Peering.
+This project demonstrates how to establish private network communication between two Amazon Virtual Private Clouds (VPCs) using AWS VPC Peering.
 
-The project was completed as part of AWS Cloud Computing practical learning.
+The project was implemented using Amazon VPC, subnets, route tables, security groups, and Amazon EC2 instances.
 
-## Objectives
+## 2. Project Objectives
 
-- Create two VPCs with non-overlapping CIDR blocks.
+- Create two separate VPCs in AWS.
 - Configure public and private subnets.
 - Establish a VPC Peering connection.
 - Configure route tables for communication between VPCs.
-- Configure security groups to control network traffic.
-- Launch and connect to EC2 instances.
-- Test connectivity using private IP addresses.
-- Verify the effect of security group rules on ICMP traffic.
+- Apply security group rules to control network traffic.
+- Test private connectivity using the ping command.
+- Verify how security rules affect network communication.
 
-## AWS Services Used
+## 3. AWS Services Used
 
 - Amazon VPC
 - VPC Peering
@@ -30,109 +30,115 @@ The project was completed as part of AWS Cloud Computing practical learning.
 - Security Groups
 - Amazon Linux 2023
 
-## Network Configuration
+## 4. Network Architecture
+
+The project consists of two VPCs connected through a VPC Peering connection.
 
 ### VPC A
 
-| Resource | Configuration |
-|---|---|
-| VPC Name | ewb-vpc-a |
-| CIDR Block | 10.10.0.0/16 |
-| Public Subnet | ewb-a-public |
-| Public Subnet CIDR | 10.10.1.0/24 |
-| Private Subnet | ewb-a-private |
-| Private Subnet CIDR | 10.10.2.0/24 |
+- Name: ewb-vpc-a
+- CIDR Block: 10.10.0.0/16
+- Public Subnet: ewb-a-public
+- Public Subnet CIDR: 10.10.1.0/24
+- Private Subnet: ewb-a-private
+- Private Subnet CIDR: 10.10.2.0/24
 
 ### VPC B
 
-| Resource | Configuration |
-|---|---|
-| VPC Name | ewb-vpc-b |
-| CIDR Block | 10.20.0.0/16 |
-| Private Subnet | ewb-b-private |
-| Private Subnet CIDR | 10.20.1.0/24 |
+- Name: ewb-vpc-b
+- CIDR Block: 10.20.0.0/16
+- Private Subnet: ewb-b-private
+- Private Subnet CIDR: 10.20.1.0/24
 
-## EC2 Instances
+## 5. EC2 Instances
 
-| Instance | Private IP | Purpose |
+| Instance | Private IP Address | Purpose |
 |---|---|---|
 | ewb-bastion | 10.10.1.10 | Secure access to private instances |
 | ewb-app-a | 10.10.2.10 | Application instance in VPC A |
 | ewb-app-b | 10.20.1.10 | Application instance in VPC B |
 
-The application instances communicate using their private IP addresses.
+The instances use Amazon Linux 2023. The application instances do not require public IPv4 addresses for communication across the peered VPCs.
 
-## Implementation Steps
+## 6. VPC Peering Configuration
 
-1. Created VPC A and VPC B.
+1. Created VPC A and VPC B with non-overlapping CIDR blocks.
 2. Created the required subnets.
-3. Attached an Internet Gateway to VPC A.
-4. Created and accepted the VPC Peering connection.
-5. Added the required routes to the route tables.
-6. Configured security groups for SSH and ICMP traffic.
-7. Launched the EC2 instances.
-8. Connected to the private instances through the Bastion host.
-9. Tested connectivity between App-A and App-B.
+3. Created and attached an Internet Gateway to VPC A.
+4. Created the VPC Peering connection between VPC A and VPC B.
+5. Accepted the peering request.
+6. Added the required routes to the route tables.
+7. Configured security groups to allow the required SSH and ICMP traffic.
 
-## Routing Configuration
+## 7. Routing Configuration
 
 ### VPC A Private Route Table
 
-- `10.10.0.0/16` — Local route
-- `10.20.0.0/16` — VPC Peering connection
+- Destination: 10.10.0.0/16 — Local
+- Destination: 10.20.0.0/16 — VPC Peering connection
 
 ### VPC B Private Route Table
 
-- `10.20.0.0/16` — Local route
-- `10.10.0.0/16` — VPC Peering connection
+- Destination: 10.20.0.0/16 — Local
+- Destination: 10.10.0.0/16 — VPC Peering connection
 
-The public route table in VPC A also includes a default route to the Internet Gateway and a route to VPC B through the peering connection.
+The public route table in VPC A also contains a route to the Internet Gateway and a route to VPC B through the peering connection.
 
-## Connectivity Testing
+## 8. Security Configuration
 
-### Test 1: App-A to App-B
+Security groups were configured to control access to the EC2 instances.
+
+- SSH access was restricted to the required source IP addresses.
+- ICMP traffic was allowed between the two application instances for connectivity testing.
+- Default outbound rules were retained.
+
+## 9. Connectivity Testing
+
+The ping command was used to test private communication between the application instances.
+
+### Test 1: VPC A to VPC B
 
 Command:
 
 `ping -c 4 10.20.1.10`
 
-Result: Successful — 4 packets transmitted, 4 received, 0% packet loss.
+Result: Successful. Four packets were transmitted and four were received, with 0% packet loss.
 
-### Test 2: App-B to App-A
+### Test 2: VPC B to VPC A
 
 Command:
 
 `ping -c 4 10.10.2.10`
 
-Result: Successful — 4 packets transmitted, 4 received, 0% packet loss.
+Result: Successful. Four packets were transmitted and four were received, with 0% packet loss.
 
-### Test 3: ICMP Rule Removed
+### Test 3: Security Rule Verification
 
 The inbound ICMP rule on the App-B security group was temporarily removed.
 
-Result: Ping failed with 100% packet loss.
+Result: The ping test failed with 100% packet loss.
 
-### Test 4: ICMP Rule Restored
+### Test 4: Connectivity Restored
 
-The inbound ICMP rule was restored and connectivity was tested again.
+The ICMP rule was restored and the ping test was repeated.
 
-Result: Ping succeeded with 0% packet loss.
+Result: Communication succeeded again with 0% packet loss.
 
-## Screenshots and Evidence
+## 10. Screenshots and Evidence
 
-Project screenshots are available in the [`screenshots`](./screenshots/) folder.
+Screenshots of the AWS configuration and connectivity tests are included in this repository.
 
-The evidence includes VPC configuration, subnets, route tables, the peering connection, security groups, EC2 instances, SSH access, and connectivity testing.
+They provide evidence of the VPC configuration, subnets, peering connection, route tables, security groups, EC2 instances, and connectivity test results.
 
-## Conclusion
+## 11. Conclusion
 
-The project successfully demonstrated private communication between two AWS VPCs using VPC Peering.
+The AWS VPC Peering project was successfully implemented and tested.
 
-Connectivity was verified in both directions using private IP addresses. The ICMP security test also demonstrated how security group rules can block and restore network traffic.
+Both application instances communicated using their private IP addresses through the VPC Peering connection. The bidirectional ping tests were successful. The controlled security test demonstrated that removing the required ICMP inbound rule blocked ping traffic, while restoring the rule restored connectivity.
 
-This project provided practical experience with AWS networking, VPC Peering, routing, security groups, EC2, and troubleshooting.
+This project provided practical experience with AWS networking, VPC Peering, route tables, security groups, EC2 instances, and network troubleshooting.
 
-## Author
+## 12. Author
 
 AWS Cloud Computing Internship Project  
 Team EWB Courses
